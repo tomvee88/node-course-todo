@@ -6,14 +6,12 @@ const {app} = require('./../server');
 const {Todo} = require('./../models/todos');
 
 beforeEach((done) => {
-    Todo.remove({}).then(() => {
-        done();
-    });
+    Todo.remove({}).then(() => done());
 });
 
-describe('POST /todos', () => {
+describe('TODO /post', () => {
     it('should create todo', (done) => {
-        var text = 'Testing...';
+        var text = 'something to do';
 
         request(app)
             .post('/todos')
@@ -32,8 +30,29 @@ describe('POST /todos', () => {
                         done();
                     }).catch((e) => {
                         done(e);
+                    })
+                }
+            });
+    });
+
+    it('should not create todo', (done) => {
+
+        request(app)
+            .post('/todos')
+            .send({})
+            .expect(400)
+            .end((err, res) => {
+                if (err) {
+                    done(err);
+                } else {
+                    Todo.find().then((todos) => {
+                        expect(todos.length).toBe(0);
+                        done();
+                    }).catch((e) => {
+                        done(e);
                     });
                 }
             });
     });
-})
+
+});
