@@ -106,6 +106,31 @@ describe('GET /todos', () => {
     });
 });
 
+describe('DELETE /todos/:id', () => {
+    it('should delete todo', () => {
+        var hexId = todos[1]._id.toHexString();
+        
+            request(app)
+                .delete(`/todos/${hexId}`)
+                .expect(200)
+                .expect((res) => {
+                        expect(res.body.todo._id).toBe(hexId);
+                })
+                .end((err, res) => {
+                    if (err) {
+                        done(err);
+                    } else {
+                        Todo.findById(hexId).then((todo) => {
+                            expect(todo).toNotExist();
+                            done();
+                        }).catch((e) => {
+                            done(e);
+                        });
+                    }
+                });
+    });
+});
+
 
 
 
