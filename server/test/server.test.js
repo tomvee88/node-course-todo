@@ -13,7 +13,9 @@ const todos = [
     },
     {
         _id: new ObjectID(),
-        text: 'Houston we have a problem'
+        text: 'Houston we have a problem',
+        completed: true,
+        completedAt: 888
     }
 ];
 
@@ -94,16 +96,36 @@ describe('GET /todos', () => {
             // })
             // .end(done);
     });
+});
 
-    it('should get individual todo', (done) => {
+describe('GET /todos/:id', () => {
+    it('should return todo doc', (done) => {
+        var id = todos[0]._id.toHexString();
+
         request(app)
-            .get(`/todos/${todos[0]._id}`)
-            .expect(200)
+            .get(`/todos/${id}`)
             .expect((res) => {
                 expect(res.body.todo.text).toBe(todos[0].text);
             })
             .end(done);
-    });
+    }); 
+//****************
+    it('should return 404 if todo not found', (done) => {
+        var id = todos[0]._id.toHexString();
+
+        request(app)
+            .get(`/todos/${id} + 1`)
+            .expect(404)
+            .end(done);
+    }); 
+//****************
+    it('should return 404 for non-object ids', (done) => {
+        request(app)
+        .get(`/todos/${123}`)
+        .expect(404)
+        .end(done);                
+    }); 
+
 });
 
 describe('DELETE /todos/:id', () => {
@@ -130,6 +152,45 @@ describe('DELETE /todos/:id', () => {
                 });
     });
 });
+
+describe('PATCH /todos/:id', () => {
+    it('should update a todo', (done) => {
+        var hexId = todos[0]._id;
+        var updateText = 'Some updated text';
+
+        request(app)
+            .patch(`/todos/${hexId}`)
+            .send({
+                completed: true,
+                text: updateText
+            })
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.todo.text).toBe(updateText);
+                expect(res.body.todo.completed).toBe(true);
+                expect(res.body.todo.completedAt).toBeA('number');
+            })
+            .end(done);
+    });
+
+    it('should clear completedAT when todo is not completed', (done) => {
+        var hexId = todos[1]._id;
+        var updateText = 'Some updated text';
+
+        request(app)
+            .patch(`/todos/${hexId}`)
+            .send({
+                completed: false,
+                text: updateText
+            })
+            .expect((res) => {
+                expect(res.body.todo.text).toBe(updateText);
+                expect(res.body.todo.completed).toBe(false);
+                expect(res.body.todo.completedAt).toNotExist();
+            })
+            .end(done)
+    });
+})
 
 
 

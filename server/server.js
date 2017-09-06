@@ -1,3 +1,5 @@
+require('./config/config.js');
+
 const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -10,7 +12,7 @@ const {User} = require('./models/users');
 
 var app = express();
 
-var port = process.env.PORT || 3000;
+var port = process.env.PORT;
 
 // the return value from this json method is a returned function AND THAT IS THE MIDDLE
 // GIVEN TO EXPRESS!!!
@@ -55,46 +57,20 @@ app.get('/todos/:id', (req, res) => {
     }
 });
 
-app.delete('/todos/:id', (req, res) => {
-    //get the id
-    //validate the id - if not 404
-    //remove todo by id
-        //success
-            //if no doc send 404
-            //if doc send back w 200
-        //error
-            //400 with empty body
-    var id = req.params.id;
-    var validID = ObjectID.isValid(id);
-    
-    if (!validID) {
-        res.status(404).send();
-    } else {
-        Todo.findByIdAndRemove(id).then((todo) => {
-            if (!todo) {
-                res.status(404).send();
-            } else {
-                res.status(200).send({todo});
-            }
-        }).catch((e) => {
-            res.status(400).send(e);
-        });
-    }
-
-});
-
-// update - patch method
+//update "patch"
 app.patch('/todos/:id', (req, res) => {
+    //get id 
     var id = req.params.id;
+    //lodash get body prop
     var body = _.pick(req.body, ['text', 'completed']);
 
     //varify id
     if(!ObjectID.isValid(id)) {
         res.status(404).send();
-    };
+    }
 
-    //check if Boolean
-    if(_.isBoolean(body.completed) && body.completed){
+    //check if boolean
+    if(_.isBoolean(body.completed) && body.completed) {
         body.completedAt = new Date().getTime();
     } else {
         body.completed = false;
@@ -107,16 +83,16 @@ app.patch('/todos/:id', (req, res) => {
         },
         {
             new: true
-        }
-    ).then((todo) => {
-        if(!todo) {
-            res.status(404).send();
-        } else {
-            res.send({todo});
-        }
-    }).catch((e) => {
-        res.status(404).send();
-    });
+        }).then((todo) => {
+            if(!todo) {
+                res.status(404).send();
+            } else {
+                res.send({todo});
+            }
+        }).catch((e) => {
+            res.status(400).send();
+        });
+
 });
 
 
