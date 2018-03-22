@@ -1,6 +1,7 @@
 const express = require('express');
 const {mongoose} = require('./db/mongoose');
 const bodyParser = require('body-parser');
+const {ObjectID} = require('mongodb');
 // local
 const {Todo} = require('./models/todo');
 const {User} = require('./models/user');
@@ -28,6 +29,28 @@ app.get('/todos', (req, res) => {
     }, (e) => {
         res.status(400).send(e);
     });
+});
+
+// individual todo /todo/123u65425834hdkj
+app.get('/todos/:id', (req, res) => {
+    let id = req.params.id;
+    // valid id
+    let validID = ObjectID.isValid(id);
+    // 404 - send back
+    if(!validID) {
+        res.status(404).send();
+    }   
+    // findbyid
+    Todo.findById(id).then((todo) => {
+        if(!todo) {
+            return res.status(404).send();
+        }
+
+        res.send({todo});
+    }).catch((e) => {
+        res.status(400).send(e);
+    });
+    
 });
 
 app.listen(port, () => {
