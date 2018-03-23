@@ -9,7 +9,7 @@ const {User} = require('./models/user');
 const app = express();
 // middleware 
 app.use(bodyParser.json());
-let port = 3000;
+let port = process.env.PORT || 3000;
 
 app.post('/todos', (req, res) => {
     let todo = new Todo({
